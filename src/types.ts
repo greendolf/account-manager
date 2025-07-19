@@ -1,14 +1,11 @@
 export interface Account {
   id: string
-  label: string
+  label: LabelItem[]
   type: 'ldap' | 'local'
   login: string
   password: string | null
-  isValid?: boolean
-  touchedFields?: {
-    label?: boolean
-    type?: boolean
-    login?: boolean
-    password?: boolean
-  }
+}
+
+export interface LabelItem {
+  text: string
 }
