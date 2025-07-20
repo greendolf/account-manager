@@ -3,25 +3,32 @@ import { ref, watchEffect } from 'vue'
 import type { Account } from '@/types'
 
 export const useAccountsStore = defineStore('accounts', () => {
-  const accounts = ref<Account[]>([])
+  const accounts = ref<Account[]>(loadFromLocalStorage())
 
-  function loadFromLocalStorage() {
+  function loadFromLocalStorage(): Account[] {
     const saved = localStorage.getItem('accounts')
     if (saved) {
-      accounts.value = JSON.parse(saved)
+      return JSON.parse(saved)
     }
+    return []
   }
 
-  function addAccount(account: Account) {
-    accounts.value.push(account)
+  function addAccount(account: Omit<Account, 'id'>) {
+    let id: number
+    if (accounts.value.length > 0) {
+      id = accounts.value[accounts.value.length - 1].id + 1
+    } else id = 1
+    accounts.value.push({ id, ...account })
   }
 
-  function updateAccount(index: number, account: Account) {
-    accounts.value[index] = account
+  function updateAccount(newAccount: Account) {
+    console.log(`Аккаунт ${newAccount.id} обновляется`)
+    const index = accounts.value.findIndex((account) => (account.id = newAccount.id))
+    accounts.value[index] = newAccount
   }
 
-  function deleteAccount(index: number) {
-    accounts.value.splice(index, 1)
+  function deleteAccount(id: number) {
+    accounts.value = accounts.value.filter((account) => account.id !== id)
   }
 
   watchEffect(() => {

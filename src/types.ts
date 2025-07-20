@@ -1,5 +1,5 @@
 export interface Account {
-  id: string
+  id: number
   label: LabelItem[]
   type: 'ldap' | 'local'
   login: string

@@ -15,14 +15,13 @@ import AccountsList from './components/AccountsList.vue'
 const accountsStore = useAccountsStore()
 
 function addNewAccount() {
-  console.log('Аккаунт добавлен')
   accountsStore.addAccount({
-    id: Date.now().toString(),
     label: [],
     type: 'local',
     login: '',
     password: '',
   })
+  console.log('Аккаунт добавлен')
 }
 </script>
 
