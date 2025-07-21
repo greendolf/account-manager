@@ -3,7 +3,8 @@ export interface Account {
   label: LabelItem[]
   type: 'ldap' | 'local'
   login: string
-  password: string | null
+  password: string
+  validated: boolean
 }
 
 export interface LabelItem {

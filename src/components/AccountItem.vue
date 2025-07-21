@@ -4,15 +4,16 @@
       <v-row>
         <v-col md="3">
           <v-text-field
-            v-model="localAccount.label"
+            v-model="labelInput"
             label="Метка"
             :hint="'Введите метки через точку с запятой (максимум 50 символов)'"
             persistent-hint
-            :error-messages="getLabelErrors()"
+            :error-messages="touchedInputs.label ? getLabelErrors(labelInput) : []"
             @blur="
               () => {
                 touchedInputs.label = true
-                validateAccount()
+                parseLabel()
+                updateAccount(localAccount)
               }
             "
           />
@@ -25,7 +26,7 @@
               { title: 'LDAP', value: 'ldap' },
               { title: 'Локальная', value: 'local' },
             ]"
-            @update:model-value="validateAccount"
+            @update:model-value="updateAccount(localAccount)"
           />
         </v-col>
         <v-col md="2">
@@ -33,11 +34,11 @@
             v-model="localAccount.login"
             label="Логин"
             :counter="100"
-            :error-messages="getLoginErrors()"
+            :error-messages="touchedInputs.login ? getLoginErrors(localAccount.login) : []"
             @blur="
               () => {
                 touchedInputs.login = true
-                validateAccount()
+                updateAccount(localAccount)
               }
             "
           />
@@ -50,11 +51,11 @@
             :counter="100"
             :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
             @click:append-inner="togglePasswordVisibility"
-            :error-messages="getPasswordErrors()"
+            :error-messages="touchedInputs.password ? getPasswordErrors(localAccount.password) : []"
             @blur="
               () => {
                 touchedInputs.password = true
-                validateAccount()
+                updateAccount(localAccount)
               }
             "
           />
@@ -69,7 +70,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Account } from '@/types'
+import type { Account, LabelItem } from '@/types'
+import { useAccountsStore } from '@/stores/accountsStore'
 
 const { account } = defineProps<{
   account: Account
@@ -80,7 +82,11 @@ const emit = defineEmits<{
   (e: 'delete-account', id: number): void
 }>()
 
-const localAccount = ref<Account>({ ...account })
+const { getLabelErrors, getLoginErrors, getPasswordErrors, updateAccount } = useAccountsStore()
+
+const localAccount = ref<Account>(account)
+
+const labelInput = ref<string>(localAccount.value.label.map((label) => label.text).join('; '))
 
 const showPassword = ref<boolean>(false)
 function togglePasswordVisibility() {
@@ -93,42 +99,15 @@ const touchedInputs = ref<{ label: boolean; login: boolean; password: boolean }>
   password: false,
 })
 
-function isValidAccount() {
-  return (
-    getLabelErrors().length === 0 &&
-    getLoginErrors().length === 0 &&
-    getPasswordErrors().length === 0
-  )
+function parseLabel() {
+  const arrLabel = labelInput.value.split(';').map((label): LabelItem => {
+    return {
+      text: label.trim(),
+    }
+  })
+  localAccount.value.label = arrLabel
 }
 
-function validateAccount() {
-  if (isValidAccount() && touchedInputs.value.login && touchedInputs.value.password) {
-    console.log(`Аккаунт ${localAccount.value.id} подтверждён`)
-    emit('update-data', localAccount.value)
-  }
-}
-
-function getLabelErrors() {
-  if (!touchedInputs.value.label) return []
-  if (localAccount.value.label.length > 50) return ['Максимум 50 символов']
-  return []
-}
-
-function getLoginErrors() {
-  if (!touchedInputs.value.login) return []
-  if (!localAccount.value.login.trim()) return ['Логин обязателен']
-  if (localAccount.value.login.length > 100) return ['Максимум 100 символов']
-  return []
-}
-
-function getPasswordErrors() {
-  if (!touchedInputs.value.password) return []
-  if (localAccount.value.type === 'local' && !localAccount.value.password)
-    return ['Пароль обязателен']
-  if (localAccount.value.password && localAccount.value.password.length > 100)
-    return ['Максимум 100 символов']
-  return []
-}
 function deleteAccount() {
   emit('delete-account', localAccount.value.id)
 }
