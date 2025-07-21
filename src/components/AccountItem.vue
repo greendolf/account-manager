@@ -2,7 +2,7 @@
   <v-card>
     <v-card-text>
       <v-row>
-        <v-col md="3">
+        <v-col md="5">
           <v-text-field
             v-model="labelInput"
             label="Метка"
@@ -18,7 +18,7 @@
             "
           />
         </v-col>
-        <v-col md="3">
+        <v-col md="2">
           <v-select
             v-model="localAccount.type"
             label="Тип записи"
@@ -29,7 +29,7 @@
             @update:model-value="updateAccount(localAccount)"
           />
         </v-col>
-        <v-col md="2">
+        <v-col :md="localAccount.type === 'local' ? 2 : 4">
           <v-text-field
             v-model="localAccount.login"
             label="Логин"
@@ -60,7 +60,7 @@
             "
           />
         </v-col>
-        <v-col md="2">
+        <v-col md="1">
           <v-btn @click="deleteAccount" icon="mdi-delete" />
         </v-col>
       </v-row>
