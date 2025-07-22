@@ -23,7 +23,7 @@ export const useAccountsStore = defineStore('accounts', () => {
 
   function updateAccount(newAccount: Account) {
     console.log(`Аккаунт ${newAccount.id} обновляется`)
-    const index = accounts.value.findIndex((account) => (account.id = newAccount.id))
+    const index = accounts.value.findIndex((account) => account.id === newAccount.id)
     accounts.value[index] = newAccount
     if (validateAccount(newAccount)) saveData()
   }
@@ -54,7 +54,7 @@ export const useAccountsStore = defineStore('accounts', () => {
     if (
       getLabelErrors(account.label.map((label) => label.text).join('; ')).length === 0 &&
       getLoginErrors(account.login).length === 0 &&
-      getPasswordErrors(account.password).length === 0
+      (getPasswordErrors(account.password).length === 0 || account.type === 'ldap')
     ) {
       account.validated = true
       return true
